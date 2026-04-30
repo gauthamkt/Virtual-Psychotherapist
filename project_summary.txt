@@ -1,0 +1,68 @@
+# MindSpace: Virtual Psychotherapist - Project Analysis & Development Log
+
+## Overview
+MindSpace is an offline-capable (with cloud TTS enhancement) Virtual Psychotherapist application. The primary goal of the project was to create a responsive, empathetic AI therapist (Dr. Maya) that users can interact with via voice or text. The system analyzes the user's emotional state, generates therapeutic responses, and delivers them through an animated avatar with synchronized text-to-speech.
+
+## Core Architecture & Modules
+
+### 1. Backend Framework & API (`app.py`, `start.py`)
+- Built using Flask to serve a robust REST API.
+- Implemented CORS for cross-origin requests.
+- Created robust API routes:
+  - `/api/chat`: Handles text input, triggers emotion detection, fetches LLM responses, logs to the database, and maintains conversational history.
+  - `/api/voice-input`: Handles raw audio file uploads (WAV/MP3), passes them to the STT handler, and returns transcriptions.
+  - `/api/speak`: Receives text and returns an audio file (`audio/mpeg`) containing the TTS generated voice.
+  - `/api/session/new` & `/api/session/<id>/end`: Manages user interactions as discrete therapy sessions.
+- `start.py` acts as the entry point, resolving environment checks (Ollama availability, dependencies) before launching the Flask server.
+
+### 2. Large Language Model Integration (`llm_handler.py`)
+- Integrated with Ollama running locally.
+- Designed a custom system prompt ("Dr. Maya") forcing the LLM to behave strictly as an empathetic, professional therapist.
+- Implemented retry logic and JSON validation if the model fails to return properly formatted responses.
+- Maintains short-term conversational context by feeding chat histodry into the generation pipeline.
+
+### 3. Emotion Detection Engine (`emotion.py`)
+- Implemented a multi-layered approach to detect emotional polarity and specific distinct emotions (joy, sadness, anger, fear, anxiety, neutral).
+- Uses VADER (Valence Aware Dictionary and sEntiment Reasoner) for quick sentiment polarity.
+- Employs HuggingFace's Transformers (`j-hartmann/emotion-english-distilroberta-base`) for complex multi-label emotion classification.
+- Implemented a "Crisis Detection" override (keyword-based fallback + model confidence) to flag severe distress (e.g., suicide, harm).
+
+### 4. Text-to-Speech (TTS) Engine (`tts_handler.py`)
+- **Evolution**: Originally built using local machine learning models (Coqui TTS / Tacotron2) and pyttsx3 as a fallback.
+- **Refactoring & Upgrade**: Replaced the performance-heavy local engines with a reverse-engineered cloud API from `rekam.ai`.
+- **Implementation Details**:
+  - Automatically fetches session cookies and consent from Rekam.ai.
+  - Generates high-quality voice audio (`af_heart` voice profile) and downloads it as an MP3 file.
+  - Supports chunking for long text and text pre-processing (expanding abbreviations to prevent spelling-out issues).
+  - Modifies speech speed dynamically based on the user's emotional state (e.g., speaks slower and more softly if the user is 'sad').
+
+### 5. Speech-to-Text (STT) Engine (`stt_handler.py`)
+- Utilizes OpenAI's Whisper model (running locally) to accurately transcribe user microscopic voice recordings.
+- Provides fallback systems to Vosk if Whisper fails or lacks VRAM.
+
+### 6. Database & Persistence (`database.py`)
+- Uses SQLAlchemy (SQLite: `therapist.db`) for lightweight, offline data storage.
+- Tracks tables:
+  - `TherapySession`: Links distinct conversations.
+  - `Message`: Stores user inputs and therapist outputs alongside the detected emotion for that turn.
+  - `EmotionLog`: Aggregates the general emotional movement of the user over time.
+
+### 7. Frontend User Interface (`templates/index.html`)
+- Built a split-panel layout: Left side contains the therapist avatar and emotion tracking; Right side holds the chat interface.
+- Implemented responsive CSS (CSS Variables, Flexbox), designed to look modern and clinical.
+- **Features added**:
+  - Live Emotion Bar: Highlights the detected emotion (Joy, Sadness, etc.) corresponding to the backend analysis.
+  - Crisis Banner: Automatically displays emergency hotline numbers if `is_crisis=True` is returned by the backend.
+  - Audio Toggle Button: Resolves brutal browser auto-play policies. Requires the user to explicitly enable audio before the avatar starts speaking automatically.
+  - Corrected message bubble text-wrapping (`word-wrap: break-word;`) to prevent short messages from stacking vertically.
+
+### 8. Avatar Animation & Lip-Sync (`static/js/avatar.js`)
+- Hand-coded an SVG avatar.
+- Implemented Web Audio API `AudioContext` and `AnalyserNode` to intercept the playing text-to-speech MP3 files.
+- Calculates frequency bands (bins 2-30, matching human vocal ranges) to determine amplitude.
+- **Animation Mathematics**:
+  - Upgraded the `_animateMouth` function from static toggles to a fluid, dual-curve bezier morph.
+  - The mouth morphs dynamically based on volume: wide arrays (E sounds), tall arrays (A sounds), and narrow elongated shapes (O sounds), achieving a highly realistic lip-sync effect.
+
+## Summary of the Journey
+We transformed a disjointed collection of machine learning scripts into a fully cohesive web application. We solved significant UX challenges like browser autoplay-blocking for AI voices, fixed CSS alignment bugs, and pivoted from a slow local TTS architecture to a vastly superior cloud-based API to maximize audio quality and response speed. The integration is now seamless between the microphone, LLM logic, emotion detection, and avatar visualization.

@@ -1,0 +1,35 @@
+MindSpace — Virtual Psychotherapist
+===================================
+Setup & Running Instructions
+
+Since you have just installed Ollama, you must open a completely NEW terminal
+window so your computer recognizes the "ollama" command.
+
+Step 1: Download the AI Model
+-----------------------------
+1. Open a new Command Prompt or PowerShell window.
+2. Run this command to download the brain of the psychotherapist:
+   
+   ollama pull mistral
+
+   (Note: This is a ~4GB download and may take a few minutes depending on your internet speed. Wait for the word "success" to appear).
+
+Step 2: Start the Application
+-----------------------------
+1. Open your project folder in the terminal:
+   cd d:\MCA\aswinproks\first
+
+2. Activate the virtual environment:
+   venv\Scripts\activate
+
+3. Start the application:
+   python start.py
+
+Step 3: Talk to Dr. Maya!
+-----------------------------
+Wait a few seconds for everything to load.
+The application should automatically open in your web browser at:
+http://localhost:5000
+
+When you are finished chatting, you can close the browser and press
+Ctrl + C in your terminal to shut down the server.

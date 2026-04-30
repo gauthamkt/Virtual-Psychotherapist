@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Puter TTS Test</title>
+    <script src="https://js.puter.com/v2/"></script>
+</head>
+<body>
+    <h1>Puter TTS Test</h1>
+    <button id="testBtn">Test TTS</button>
+    <audio id="audioPlayer" controls></audio>
+    
+    <script>
+        document.getElementById('testBtn').addEventListener('click', async () => {
+            try {
+                console.log('Testing Puter TTS...');
+                
+                const audio = await puter.ai.txt2speech(
+                    "Hello! This is a test of the Puter TTS system with ElevenLabs voice.",
+                    {
+                        provider: "elevenlabs",
+                        model: "eleven_multilingual_v2", 
+                        voice: "21m00Tcm4TlvDq8ikWAM",
+                        output_format: "mp3_44100_128"
+                    }
+                );
+                
+                console.log('Audio received:', audio);
+                document.getElementById('audioPlayer').src = URL.createObjectURL(audio);
+                document.getElementById('audioPlayer').play();
+                
+                // Also try to convert to blob for analysis
+                const reader = new FileReader();
+                reader.onload = function() {
+                    console.log('Audio size:', audio.size, 'bytes');
+                    console.log('Audio type:', audio.type);
+                };
+                reader.readAsArrayBuffer(audio);
+                
+            } catch (error) {
+                console.error('TTS failed:', error);
+                alert('TTS failed: ' + error.message);
+            }
+        });
+    </script>
+</body>
+</html>

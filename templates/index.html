@@ -1,0 +1,1555 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description"
+    content="MindSpace — Your compassionate AI virtual psychotherapist. A safe, private space to explore your thoughts and feelings." />
+  <title>MindSpace — Virtual Psychotherapist</title>
+
+  <!-- Google Fonts: Nunito -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ================================================================
+       DESIGN TOKENS
+       ================================================================ */
+    :root {
+      --primary: #3A7ABF;
+      --primary-light: #5A9AD9;
+      --primary-dark: #2C5F96;
+      --accent: #52B788;
+      --accent-light: #6FCF9F;
+      --bg: #F8FBFF;
+      --bg-card: #FFFFFF;
+      --panel-bg: linear-gradient(165deg, #EBF4FF 0%, #E0F2FE 40%, #F0FFF4 100%);
+      --timer-bg: rgba(255, 255, 255, 0.6);
+      --text: #2D3748;
+      --text-light: #718096;
+      --text-muted: #A0AEC0;
+      --border: #E2E8F0;
+      --danger: #E53E3E;
+      --danger-bg: #FFF5F5;
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+      --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.08);
+      --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.10);
+      --radius: 12px;
+      --radius-lg: 18px;
+      --font: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
+
+      /* Emotion colors */
+      --emo-joy: #F6E05E;
+      --emo-sadness: #90CDF4;
+      --emo-anger: #FC8181;
+      --emo-fear: #C084FC;
+      --emo-anxiety: #FDBA74;
+      --emo-disgust: #86EFAC;
+      --emo-neutral: #CBD5E0;
+    }
+
+    /* ================================================================
+       THEMES
+       ================================================================ */
+
+    body.theme-sky {
+      --bg: #ffffff !important;
+      --bg-card: #f8fbff;
+      --panel-bg: linear-gradient(165deg, #EBF4FF 0%, #E0F2FE 40%, #F0FFF4 100%);
+      --timer-bg: rgba(255, 255, 255, 0.6);
+      --text: #1a202c;
+      --text-light: #4a5568;
+      --text-muted: #718096;
+      --border: rgba(0, 0, 0, 0.1);
+    }
+
+    body.theme-night {
+      --bg: #1a202c !important;
+      --bg-card: #2d3748;
+      --panel-bg: linear-gradient(165deg, #2d3748 0%, #1a202c 40%, #2d3748 100%);
+      --timer-bg: rgba(0, 0, 0, 0.25);
+      --text: #f7fafc;
+      --text-light: #e2e8f0;
+      --text-muted: #a0aec0;
+      --border: #4a5568;
+      --shadow-sm: 0 4px 6px rgba(0, 0, 0, 0.4);
+    }
+
+    body,
+    .chat-panel,
+    .avatar-panel,
+    .messages-area,
+    .chat-header {
+      transition: background 0.8s ease, background-color 0.8s ease, color 0.8s ease, border-color 0.8s ease;
+    }
+
+    /* ================================================================
+       RESET & BASE
+       ================================================================ */
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      font-size: 16px;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: var(--font);
+      color: var(--text);
+      background: var(--bg);
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    :focus-visible {
+      outline: 3px solid var(--primary-light);
+      outline-offset: 2px;
+      border-radius: 4px;
+    }
+
+    button {
+      cursor: pointer;
+      border: none;
+      background: none;
+      font-family: inherit;
+    }
+
+    a {
+      color: var(--primary);
+      text-decoration: underline;
+    }
+
+    /* ================================================================
+       LAYOUT
+       ================================================================ */
+    .app-wrapper {
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* --- LEFT: Avatar Panel --- */
+    .avatar-panel {
+      flex: 0 0 35%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: var(--panel-bg);
+      border-right: 1px solid var(--border);
+      padding: 28px 20px 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .avatar-panel::before {
+      content: '';
+      position: absolute;
+      top: -60px;
+      right: -60px;
+      width: 220px;
+      height: 220px;
+      background: radial-gradient(circle, rgba(82, 183, 136, 0.12) 0%, transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .brand-icon {
+      width: 36px;
+      height: 36px;
+      background: var(--primary);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 800;
+      font-size: 18px;
+    }
+
+    .brand h1 {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: var(--primary-dark);
+      letter-spacing: -0.3px;
+    }
+
+    .brand-sub {
+      font-size: 0.78rem;
+      color: var(--text-light);
+      margin-bottom: 22px;
+      text-align: center;
+    }
+
+    /* Avatar holder */
+    .avatar-holder {
+      width: 600px;
+      height: 600px;
+      position: relative;
+      margin-bottom: 20px;
+      filter: drop-shadow(0 4px 12px rgba(58, 122, 191, 0.13));
+    }
+
+    /* Dr. Maya name */
+    .therapist-name {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 2px;
+    }
+
+    .therapist-title {
+      font-size: 0.78rem;
+      color: var(--text-light);
+      margin-bottom: 20px;
+    }
+
+    /* Therapist info wrapper */
+    .therapist-info {
+      position: relative;
+      z-index: 5;
+      margin-bottom: 60px;
+      clear: both;
+      overflow: visible;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      min-height: 80px;
+    }
+
+    /* Emotion indicator bar */
+    .emotion-bar {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 260px;
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      box-shadow: var(--shadow-sm);
+      z-index: 1000;
+      pointer-events: auto;
+    }
+
+    .emotion-bar-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .emotion-strip {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+
+    .emotion-dot {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: rgba(0, 0, 0, 0.45);
+      transition: all 0.3s ease;
+      position: relative;
+      opacity: 0.4;
+    }
+
+    .emotion-dot.active {
+      opacity: 1;
+      transform: scale(1.2);
+      box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.06);
+    }
+
+    .emotion-dot[data-emo="joy"] {
+      background: var(--emo-joy);
+    }
+
+    .emotion-dot[data-emo="sadness"] {
+      background: var(--emo-sadness);
+    }
+
+    .emotion-dot[data-emo="anger"] {
+      background: var(--emo-anger);
+    }
+
+    .emotion-dot[data-emo="fear"] {
+      background: var(--emo-fear);
+    }
+
+    .emotion-dot[data-emo="anxiety"] {
+      background: var(--emo-anxiety);
+    }
+
+    .emotion-dot[data-emo="neutral"] {
+      background: var(--emo-neutral);
+    }
+
+    .emotion-current-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text);
+      text-align: center;
+    }
+
+    /* Session timer */
+    .session-timer {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      padding: 12px 20px 30px;
+      background: var(--timer-bg);
+      border-radius: 20px;
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .session-timer .dot {
+      width: 6px;
+      height: 6px;
+      background: var(--accent);
+      border-radius: 50%;
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-dot {
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.4;
+      }
+    }
+
+    /* --- RIGHT: Chat Panel --- */
+    .chat-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    /* Header */
+    .chat-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 24px;
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      box-shadow: var(--shadow-sm);
+      z-index: 3;
+    }
+
+    .chat-header-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--accent);
+      background: rgba(82, 183, 136, 0.1);
+      padding: 4px 10px;
+      border-radius: 20px;
+    }
+
+    .status-badge .dot {
+      width: 6px;
+      height: 6px;
+      background: var(--accent);
+      border-radius: 50%;
+    }
+
+    .chat-header-title {
+      font-size: 1rem;
+      font-weight: 700;
+    }
+
+    .new-session-btn {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--primary);
+      padding: 6px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      transition: all 0.2s;
+    }
+
+    .new-session-btn:hover {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+
+    /* Crisis banner */
+    .crisis-banner {
+      display: none;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 24px;
+      background: var(--danger-bg);
+      border-bottom: 2px solid var(--danger);
+      font-size: 0.82rem;
+      color: var(--danger);
+      animation: slide-down 0.4s ease;
+    }
+
+    .crisis-banner.visible {
+      display: flex;
+    }
+
+    .crisis-banner strong {
+      font-weight: 700;
+    }
+
+    .crisis-banner a {
+      color: var(--danger);
+      font-weight: 700;
+    }
+
+    .crisis-dismiss {
+      margin-left: auto;
+      font-size: 1.1rem;
+      color: var(--danger);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .crisis-dismiss:hover {
+      background: rgba(229, 62, 62, 0.1);
+    }
+
+    @keyframes slide-down {
+      from {
+        transform: translateY(-100%);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    /* Messages area */
+    .messages-area {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px 24px 8px;
+      scroll-behavior: smooth;
+    }
+
+    .messages-area::-webkit-scrollbar {
+      width: 5px;
+    }
+
+    .messages-area::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 10px;
+    }
+
+    /* Welcome card */
+    .welcome-card {
+      text-align: center;
+      padding: 40px 32px;
+      margin-bottom: 24px;
+      background: linear-gradient(135deg, rgba(58, 122, 191, 0.06) 0%, rgba(82, 183, 136, 0.06) 100%);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+    }
+
+    .welcome-card h2 {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--primary-dark);
+      margin-bottom: 8px;
+    }
+
+    .welcome-card p {
+      font-size: 0.88rem;
+      color: var(--text-light);
+      line-height: 1.6;
+      max-width: 420px;
+      margin: 0 auto 18px;
+    }
+
+    .starter-chips {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .starter-chip {
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 8px 16px;
+      border-radius: 20px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      transition: all 0.2s;
+    }
+
+    .starter-chip:hover {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* Message bubbles */
+    .message-row {
+      display: flex;
+      margin-bottom: 16px;
+      animation: msg-in 0.35s cubic-bezier(.4, 0, .2, 1) both;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    @keyframes msg-in {
+      from {
+        opacity: 0;
+        transform: translateY(16px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .message-row.user {
+      justify-content: flex-end;
+      flex-direction: row-reverse;
+    }
+
+    .message-row.bot {
+      justify-content: flex-start;
+      flex-direction: row;
+    }
+
+    /* Profile avatars */
+    .message-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 14px;
+      color: white;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .message-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+    }
+
+    .message-row.user .message-avatar {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      margin-left: 8px;
+    }
+
+    .message-row.bot .message-avatar {
+      background: linear-gradient(135deg, #3a7abf 0%, #52b788 100%);
+      margin-right: 8px;
+    }
+
+    .message-bubble {
+      max-width: 75%;
+      padding: 12px 18px;
+      border-radius: var(--radius-lg);
+      font-size: 0.95rem;
+      line-height: 1.5;
+      word-wrap: break-word;
+      word-break: normal;
+      overflow-wrap: break-word;
+      position: relative;
+    }
+
+    .message-row.user .message-bubble {
+      background: var(--primary);
+      color: #fff;
+      border-bottom-right-radius: 5px;
+      box-shadow: 0 2px 8px rgba(58, 122, 191, 0.2);
+    }
+
+    .message-row.bot .message-bubble {
+      background: var(--bg-card);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-bottom-left-radius: 5px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .message-time {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .message-row.user .message-time {
+      text-align: right;
+      color: rgba(255, 255, 255, 0.55);
+    }
+
+    /* Typing indicator */
+    .typing-row {
+      display: none;
+      justify-content: flex-start;
+      margin-bottom: 16px;
+      animation: msg-in 0.3s ease both;
+    }
+
+    .typing-row.visible {
+      display: flex;
+    }
+
+    .typing-bubble {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      border-bottom-left-radius: 5px;
+      padding: 14px 22px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .typing-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--text-muted);
+      animation: typing-bounce 1.4s ease-in-out infinite;
+    }
+
+    .typing-dot:nth-child(2) {
+      animation-delay: 0.15s;
+    }
+
+    .typing-dot:nth-child(3) {
+      animation-delay: 0.30s;
+    }
+
+    @keyframes typing-bounce {
+
+      0%,
+      60%,
+      100% {
+        transform: translateY(0);
+        opacity: 0.4;
+      }
+
+      30% {
+        transform: translateY(-6px);
+        opacity: 1;
+      }
+    }
+
+    .replay-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      cursor: pointer;
+      margin-top: 8px;
+      transition: all 0.2s;
+      padding: 0;
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* --- Input bar --- */
+    .input-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 20px;
+      background: var(--bg-card);
+      border-top: 1px solid var(--border);
+      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.03);
+    }
+
+    .input-field {
+      flex: 1;
+      font-family: var(--font);
+      font-size: 0.92rem;
+      padding: 12px 18px;
+      border: 1.5px solid var(--border);
+      border-radius: 28px;
+      background: var(--bg);
+      color: var(--text);
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+    }
+
+    .input-field::placeholder {
+      color: var(--text-muted);
+    }
+
+    .input-field:focus {
+      border-color: var(--primary-light);
+      box-shadow: 0 0 0 3px rgba(58, 122, 191, 0.10);
+    }
+
+    .icon-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+
+    /* Mic button */
+    .mic-btn {
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      color: var(--text-light);
+    }
+
+    .mic-btn:hover {
+      background: rgba(82, 183, 136, 0.1);
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .mic-btn.recording {
+      background: var(--danger);
+      color: #fff;
+      border-color: var(--danger);
+      animation: mic-pulse 1.2s ease-in-out infinite;
+    }
+
+    @keyframes mic-pulse {
+
+      0%,
+      100% {
+        box-shadow: 0 0 0 0 rgba(229, 62, 62, 0.25);
+      }
+
+      50% {
+        box-shadow: 0 0 0 10px rgba(229, 62, 62, 0);
+      }
+    }
+
+    /* Send button */
+    .send-btn {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .send-btn:hover {
+      background: var(--primary-dark);
+      transform: scale(1.05);
+    }
+
+    .send-btn:active {
+      transform: scale(0.95);
+    }
+
+    .send-btn:disabled {
+      opacity: 0.45;
+      pointer-events: none;
+    }
+
+    /* Hidden audio element */
+    #tts-audio {
+      display: none;
+    }
+
+    /* ================================================================
+       MOBILE RESPONSIVE
+       ================================================================ */
+    @media (max-width: 820px) {
+      .avatar-panel {
+        display: none;
+      }
+
+      .chat-panel {
+        flex: 1;
+      }
+
+      .chat-header-title::after {
+        content: ' — Dr. Maya';
+        font-weight: 400;
+        color: var(--text-light);
+      }
+    }
+
+    /* ================================================================
+       ACCESSIBILITY — reduced motion
+       ================================================================ */
+    @media (prefers-reduced-motion: reduce) {
+
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.01s !important;
+        transition-duration: 0.01s !important;
+      }
+    }
+
+    /* Skip link */
+    .skip-link {
+      position: absolute;
+      top: -40px;
+      left: 0;
+      background: var(--primary);
+      color: #fff;
+      padding: 8px 16px;
+      border-radius: 0 0 8px 0;
+      font-size: 0.85rem;
+      z-index: 100;
+      transition: top 0.2s;
+    }
+
+    .skip-link:focus {
+      top: 0;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Accessibility: Skip-to-content -->
+  <a class="skip-link" href="#chat-input" id="skip-link">Skip to chat input</a>
+
+  <!-- Hidden TTS audio player -->
+  <audio id="tts-audio" preload="none"></audio>
+
+  <div class="app-wrapper">
+
+    <!-- ============== LEFT: Avatar Panel ============== -->
+    <aside class="avatar-panel" aria-label="Therapist avatar and emotion indicator">
+
+      <div class="brand">
+        <div class="brand-icon" aria-hidden="true">M</div>
+        <h1>MindSpace</h1>
+      </div>
+      <p class="brand-sub">Your safe space to talk</p>
+
+      <!-- Avatar holder -->
+      <div class="avatar-holder" id="avatar-mount" role="img" aria-label="Dr. Maya, animated therapist avatar"></div>
+
+      <!-- Emotion indicator bar -->
+      <div class="emotion-bar" role="status" aria-live="polite" aria-label="Current emotional state">
+        <div class="emotion-bar-label">Emotional State</div>
+        <div class="emotion-strip">
+          <div class="emotion-dot active" data-emo="neutral" title="Neutral" tabindex="0" role="img"
+            aria-label="Neutral">😌</div>
+          <div class="emotion-dot" data-emo="joy" title="Joy" tabindex="0" role="img" aria-label="Joy">😊</div>
+          <div class="emotion-dot" data-emo="sadness" title="Sadness" tabindex="0" role="img" aria-label="Sadness">😢
+          </div>
+          <div class="emotion-dot" data-emo="anger" title="Anger" tabindex="0" role="img" aria-label="Anger">😠</div>
+          <div class="emotion-dot" data-emo="fear" title="Fear" tabindex="0" role="img" aria-label="Fear">😨</div>
+          <div class="emotion-dot" data-emo="anxiety" title="Anxiety" tabindex="0" role="img" aria-label="Anxiety">😰
+          </div>
+        </div>
+        <div class="emotion-current-label" id="emotion-label">Neutral — Calm & Attentive</div>
+      </div>
+
+      <div class="therapist-info">
+        <div class="therapist-name">Dr. Maya</div>
+        <div class="therapist-title">Virtual Psychotherapist</div>
+      </div>
+
+      <!-- Session timer -->
+      <div class="session-timer" aria-label="Session duration">
+        <span class="dot" aria-hidden="true"></span>
+        <span>Session: </span>
+        <span id="session-timer-value">00:00</span>
+      </div>
+    </aside>
+
+    <!-- ============== RIGHT: Chat Panel ============== -->
+    <main class="chat-panel" role="main">
+
+      <!-- Header -->
+      <header class="chat-header">
+        <div class="chat-header-info">
+          <h2 class="chat-header-title">Therapy Session</h2>
+          <div class="status-badge"><span class="dot" aria-hidden="true"></span> Active</div>
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <a href="/" class="new-session-btn" aria-label="Return to Home" title="Home"
+            style="text-decoration: none; background-color: var(--bg); color: var(--text-muted); border-color: var(--border); display: flex; align-items: center; justify-content: center;">
+            Home
+          </a>
+          <button class="new-session-btn" id="theme-sky-btn" aria-label="Sky Theme" title="Sky Theme"
+            style="background-color: var(--bg); color: var(--text-muted); border-color: var(--border);">
+            Sky
+          </button>
+          <button class="new-session-btn" id="theme-night-btn" aria-label="Night Theme" title="Night Theme"
+            style="background-color: var(--bg); color: var(--text-muted); border-color: var(--border);">
+            Night
+          </button>
+          <button class="new-session-btn" id="audio-toggle-btn" aria-label="Toggle Audio"
+            style="background-color: var(--bg); color: var(--text-muted); border-color: var(--border);">
+            Audio Off
+          </button>
+          <button class="new-session-btn" id="new-session-btn" aria-label="Start a new session">
+            + New Session
+          </button>
+          <button class="new-session-btn" id="terminate-btn" aria-label="Terminate session"
+            style="background-color: var(--danger-bg); color: var(--danger); border-color: var(--danger);">
+            Terminate
+          </button>
+        </div>
+      </header>
+
+      <!-- Crisis banner (hidden by default) -->
+      <div class="crisis-banner" id="crisis-banner" role="alert" aria-live="assertive">
+        <span style="font-weight: 800; font-size: 1.1rem; color: #dc2626;">!</span>
+        <div>
+          <strong>You are not alone.</strong>
+          If you're in crisis, please reach out: <a href="tel:988">988 Suicide &amp; Crisis Lifeline</a>
+          or text <strong>HOME</strong> to <strong>741741</strong>.
+        </div>
+        <button class="crisis-dismiss" id="crisis-dismiss" aria-label="Dismiss crisis banner">&times;</button>
+      </div>
+
+      <!-- Messages -->
+      <div class="messages-area" id="messages-area" role="log" aria-live="polite" aria-relevant="additions">
+
+        <!-- Welcome card -->
+        <div class="welcome-card" id="welcome-card">
+          <h2>Welcome to MindSpace</h2>
+          <p>
+            I'm Dr. Maya, your virtual therapist. This is a safe, judgment-free space.
+            Everything you share stays between us. Take your time — I'm here to listen.
+          </p>
+          <div class="starter-chips" role="group" aria-label="Conversation starters">
+            <button class="starter-chip" data-msg="I've been feeling really stressed lately.">Feeling
+              stressed</button>
+            <button class="starter-chip" data-msg="I'm struggling with my sleep.">Sleep issues</button>
+            <button class="starter-chip" data-msg="I feel anxious and overwhelmed.">Anxiety</button>
+            <button class="starter-chip" data-msg="I'd just like someone to talk to.">Just talk</button>
+          </div>
+        </div>
+
+        <!-- Typing indicator -->
+        <div class="typing-row" id="typing-indicator" aria-label="Dr. Maya is typing">
+          <div class="typing-bubble">
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Input bar -->
+      <form class="input-bar" id="input-form" autocomplete="off">
+        <button type="button" class="icon-btn mic-btn" id="mic-btn" aria-label="Record voice message"
+          title="Record voice message">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+            <line x1="12" y1="19" x2="12" y2="23" />
+            <line x1="8" y1="23" x2="16" y2="23" />
+          </svg>
+        </button>
+        <label for="chat-input" class="sr-only">Message input</label>
+        <input type="text" class="input-field" id="chat-input" placeholder="Share what's on your mind..."
+          aria-label="Type your message" autocomplete="off" />
+        <button type="submit" class="icon-btn send-btn" id="send-btn" aria-label="Send message" title="Send message">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13" />
+            <polygon points="22 2 15 22 11 13 2 9 22 2" />
+          </svg>
+        </button>
+      </form>
+    </main>
+  </div>
+
+  <!-- Screen-reader only utility class -->
+  <style>
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+  </style>
+
+  <!-- Three.js (for 3D Avatar) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <!-- GLTFLoader for ReadyPlayerMe models -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+  <!-- fflate (required by FBXLoader for binary FBX decompression) -->
+  <script src="https://cdn.jsdelivr.net/npm/fflate@0.6.10/umd/index.js"></script>
+  <!-- FBXLoader for action pose animations -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/FBXLoader.js"></script>
+  <!-- ReadyPlayerMe Avatar module -->
+  <script src="/static/js/rpm_avatar.js"></script>
+
+  <script>
+    /* ================================================================
+       CONFIGURATION
+       ================================================================ */
+    const API_BASE = 'http://localhost:5000/api';
+
+    /* ================================================================
+       STATE
+       ================================================================ */
+    let sessionId = null;
+    let sessionStart = null;
+    let timerInterval = null;
+    let mediaRecorder = null;
+    let audioChunks = [];
+    let isRecording = false;
+    let currentEmotion = 'neutral';
+
+    /* ================================================================
+       DOM REFERENCES
+       ================================================================ */
+    const $messages = document.getElementById('messages-area');
+    const $typingRow = document.getElementById('typing-indicator');
+    const $inputForm = document.getElementById('input-form');
+    const $chatInput = document.getElementById('chat-input');
+    const $sendBtn = document.getElementById('send-btn');
+    const $micBtn = document.getElementById('mic-btn');
+    const $newSessionBtn = document.getElementById('new-session-btn');
+    const $terminateBtn = document.getElementById('terminate-btn');
+    const $audioToggleBtn = document.getElementById('audio-toggle-btn');
+    const $crisisBanner = document.getElementById('crisis-banner');
+    const $crisisDismiss = document.getElementById('crisis-dismiss');
+    const $welcomeCard = document.getElementById('welcome-card');
+    const $timerValue = document.getElementById('session-timer-value');
+    const $emotionLabel = document.getElementById('emotion-label');
+    const $ttsAudio = document.getElementById('tts-audio');
+
+    let isAudioEnabled = true;
+
+    /* ================================================================
+       INITIALISATION
+       ================================================================ */
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Init avatar
+      if (typeof initAvatar === 'function') {
+        initAvatar('avatar-mount');
+      }
+
+      // Initialize audio state UI
+      if (isAudioEnabled) {
+        $audioToggleBtn.textContent = 'Audio On';
+        $audioToggleBtn.style.backgroundColor = 'var(--primary)';
+        $audioToggleBtn.style.color = '#fff';
+        $audioToggleBtn.style.borderColor = 'var(--primary)';
+      }
+
+      // Start first session
+      await startNewSession();
+      // Bind events
+      _bindEvents();
+
+      // Check for auto-send message in URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const msg = urlParams.get('msg');
+      if (msg) {
+        $chatInput.value = msg;
+        _handleSend();
+      }
+    });
+
+    function _bindEvents() {
+      // Send form
+      $inputForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        _handleSend();
+      });
+
+      // Starter chips
+      document.querySelectorAll('.starter-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+          $chatInput.value = chip.dataset.msg;
+          _handleSend();
+        });
+      });
+
+      // Mic
+      $micBtn.addEventListener('click', _toggleRecording);
+
+      // Audio Toggle
+      $audioToggleBtn.addEventListener('click', () => {
+        isAudioEnabled = !isAudioEnabled;
+        if (isAudioEnabled) {
+          $audioToggleBtn.textContent = 'Audio On';
+          $audioToggleBtn.style.backgroundColor = 'var(--primary)';
+          $audioToggleBtn.style.color = '#fff';
+          $audioToggleBtn.style.borderColor = 'var(--primary)';
+          // Play a silent tick to unlock audio context immediately
+          $ttsAudio.src = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA';
+          $ttsAudio.load();
+          const playPromise = $ttsAudio.play();
+          if (playPromise !== undefined) {
+            playPromise.catch(e => console.warn("Audio unlock prevented", e));
+          }
+          if (window.AudioContext || window.webkitAudioContext) {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            ctx.resume();
+          }
+        } else {
+          $audioToggleBtn.textContent = 'Audio Off';
+          $audioToggleBtn.style.backgroundColor = 'var(--bg)';
+          $audioToggleBtn.style.color = 'var(--text-muted)';
+          $audioToggleBtn.style.borderColor = 'var(--border)';
+          $ttsAudio.pause();
+          if (typeof stopSpeaking === 'function') stopSpeaking();
+        }
+      });
+
+      // New session
+      $newSessionBtn.addEventListener('click', startNewSession);
+
+      // Terminate session
+      $terminateBtn.addEventListener('click', () => {
+        if (confirm("Are you sure you want to terminate the current session?")) {
+          window.location.href = '/';
+        }
+      });
+
+      // Crisis dismiss
+      $crisisDismiss.addEventListener('click', () => {
+        $crisisBanner.classList.remove('visible');
+      });
+
+      // Keyboard: Enter to send, Shift+Enter for newline (if textarea)
+      $chatInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          _handleSend();
+        }
+      });
+    }
+
+    /* ================================================================
+       SESSION MANAGEMENT
+       ================================================================ */
+    async function startNewSession() {
+      try {
+        const res = await fetch(`${API_BASE}/session/new`, { method: 'POST' });
+        const data = await res.json();
+        sessionId = data.session_id;
+      } catch (err) {
+        console.warn('Failed to create session via API. Using local ID.', err);
+        sessionId = crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36);
+      }
+
+      // Reset UI
+      _clearMessages();
+      $welcomeCard.style.display = '';
+      $crisisBanner.classList.remove('visible');
+      _updateEmotion('neutral');
+
+      // Start timer
+      sessionStart = Date.now();
+      if (timerInterval) clearInterval(timerInterval);
+      timerInterval = setInterval(_updateTimer, 1000);
+      _updateTimer();
+
+      console.log('[app] Session started:', sessionId);
+    }
+
+    function _updateTimer() {
+      const elapsed = Math.floor((Date.now() - sessionStart) / 1000);
+      const m = String(Math.floor(elapsed / 60)).padStart(2, '0');
+      const s = String(elapsed % 60).padStart(2, '0');
+      $timerValue.textContent = `${m}:${s}`;
+    }
+
+    /* ================================================================
+       SEND MESSAGE
+       ================================================================ */
+    async function _handleSend() {
+      const text = $chatInput.value.trim();
+      if (!text) return;
+
+      // Hide welcome card
+      if ($welcomeCard) $welcomeCard.style.display = 'none';
+
+      // Add user bubble
+      _appendMessage('user', text);
+      $chatInput.value = '';
+      $chatInput.focus();
+
+      // Show typing indicator
+      _showTyping(true);
+
+      // Update avatar to listening
+      if (typeof setState === 'function') setState('listening');
+
+      try {
+        const res = await fetch(`${API_BASE}/chat`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: text, session_id: sessionId }),
+        });
+
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+        const data = await res.json();
+
+        _showTyping(false);
+
+        // Update emotion
+        _updateEmotion(data.emotion || 'neutral');
+
+        // Check crisis
+        if (data.emotion && data.emotion === 'crisis' || _localCrisisCheck(text)) {
+          $crisisBanner.classList.add('visible');
+        }
+
+        // Add bot reply
+        _appendMessage('bot', data.reply);
+
+        // Speak reply (TTS)
+        _speakReply(data.reply, data.emotion);
+
+      } catch (err) {
+        console.error('[app] Chat error:', err);
+        _showTyping(false);
+        _appendMessage('bot', "I'm sorry, I'm having a little trouble connecting right now. Please try again in a moment. 💙");
+        if (typeof setState === 'function') setState('idle');
+      }
+    }
+
+    /* ================================================================
+       MESSAGE RENDERING
+       ================================================================ */
+    function _appendMessage(role, text) {
+      const row = document.createElement('div');
+      row.className = `message-row ${role}`;
+      row.setAttribute('role', 'article');
+
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+      const isBot = role === 'bot';
+      const replayHtml = isBot ? `
+        <button class="replay-btn" title="Replay Audio" data-text="${_escapeHtml(text).replace(/"/g, '&quot;')}">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+          </svg>
+        </button>
+      ` : '';
+
+      row.innerHTML = `
+        <div class="message-avatar">
+          ${isBot ?
+          `<img src="/static/images/therapist-avatar.svg" alt="Dr. Maya" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+             <span style="display:none;">DM</span>` :
+          `<img src="/static/images/user-avatar.svg" alt="User" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+             <span style="display:none;">U</span>`
+        }
+        </div>
+        <div class="message-bubble-container">
+          <div class="message-bubble">${_escapeHtml(text)}</div>
+          ${replayHtml}
+          <div class="message-time">${timeStr}</div>
+        </div>
+      `;
+
+      if (isBot) {
+        const replayBtn = row.querySelector('.replay-btn');
+        if (replayBtn) {
+          replayBtn.addEventListener('click', () => {
+            _speakReply(text, currentEmotion);
+          });
+        }
+      }
+
+      // Insert before typing indicator
+      $messages.insertBefore(row, $typingRow);
+      _scrollToBottom();
+    }
+
+    function _clearMessages() {
+      const rows = $messages.querySelectorAll('.message-row');
+      rows.forEach(r => r.remove());
+    }
+
+    function _showTyping(visible) {
+      $typingRow.classList.toggle('visible', visible);
+      if (visible) _scrollToBottom();
+    }
+
+    function _scrollToBottom() {
+      requestAnimationFrame(() => {
+        $messages.scrollTop = $messages.scrollHeight;
+      });
+    }
+
+    function _escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    /* ================================================================
+       EMOTION INDICATOR
+       ================================================================ */
+    const EMOTION_DESCRIPTIONS = {
+      joy: 'Joy — Feeling positive 😊',
+      sadness: 'Sadness — Processing emotions 💙',
+      anger: 'Anger — Working through frustration',
+      fear: 'Fear — Feeling apprehensive',
+      anxiety: 'Anxiety — Heightened awareness',
+      neutral: 'Neutral — Calm & Attentive',
+      disgust: 'Disgust — Strong reaction',
+      surprise: 'Surprise — Something unexpected',
+    };
+
+    function _updateEmotion(label) {
+      currentEmotion = label;
+
+      // Map some labels to the dot set
+      let dotLabel = label;
+      if (['disgust', 'surprise'].includes(label)) dotLabel = 'neutral';
+
+      // Update dots
+      document.querySelectorAll('.emotion-dot').forEach(dot => {
+        dot.classList.toggle('active', dot.dataset.emo === dotLabel);
+      });
+
+      // Update label text
+      $emotionLabel.textContent = EMOTION_DESCRIPTIONS[label] || EMOTION_DESCRIPTIONS.neutral;
+
+      // Update avatar expression
+      const avatarEmotion = ['joy', 'sadness', 'anger', 'anxiety'].includes(label) ? label : 'neutral';
+      if (typeof setEmotion === 'function') setEmotion(avatarEmotion);
+    }
+
+    /* ================================================================
+       TEXT-TO-SPEECH PLAYBACK
+       ================================================================ */
+    async function _speakReply(text, emotion) {
+      if (!isAudioEnabled) return; // Do not attempt synthesis if user muted
+
+      if (typeof setState === 'function') setState('speaking');
+
+      try {
+        const res = await fetch(`${API_BASE}/speak`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text, emotion: emotion || 'neutral' }),
+        });
+
+        if (!res.ok) throw new Error(`TTS HTTP ${res.status}`);
+
+        const blob = await res.blob();
+        if (blob.size < 100) throw new Error('Empty audio received'); // Check for dummy wav
+
+        const url = URL.createObjectURL(blob);
+        $ttsAudio.src = url;
+
+        // Connect lip-sync
+        if (typeof startSpeaking === 'function') {
+          // Remove old listeners to prevent duplicates
+          $ttsAudio.oncanplay = () => {
+            startSpeaking($ttsAudio);
+          };
+        }
+
+        try {
+          await $ttsAudio.play();
+        } catch (playErr) {
+          console.warn('[app] Browser blocked autoplay. Please click "Audio On".', playErr);
+          if (typeof setState === 'function') setState('idle');
+          if (typeof stopSpeaking === 'function') stopSpeaking();
+          return;
+        }
+
+        $ttsAudio.onended = () => {
+          URL.revokeObjectURL(url);
+          if (typeof stopSpeaking === 'function') stopSpeaking();
+          if (typeof setState === 'function') setState('idle');
+        };
+
+      } catch (err) {
+        console.warn('[app] TTS playback failed:', err);
+        if (typeof setState === 'function') setState('idle');
+        if (typeof stopSpeaking === 'function') stopSpeaking();
+      }
+    }
+
+    /* ================================================================
+       VOICE INPUT (MediaRecorder)
+       ================================================================ */
+    async function _toggleRecording() {
+      if (isRecording) {
+        _stopRecording();
+      } else {
+        await _startRecording();
+      }
+    }
+
+    async function _startRecording() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(stream, { mimeType: _getAudioMimeType() });
+        audioChunks = [];
+
+        mediaRecorder.ondataavailable = (e) => {
+          if (e.data.size > 0) audioChunks.push(e.data);
+        };
+
+        mediaRecorder.onstop = async () => {
+          stream.getTracks().forEach(t => t.stop());
+          const blob = new Blob(audioChunks, { type: mediaRecorder.mimeType });
+          await _sendVoiceInput(blob);
+        };
+
+        mediaRecorder.start();
+        isRecording = true;
+        $micBtn.classList.add('recording');
+        $micBtn.setAttribute('aria-label', 'Stop recording');
+
+        if (typeof setState === 'function') setState('listening');
+
+      } catch (err) {
+        console.error('[app] Microphone access denied:', err);
+        alert('Microphone access is needed for voice input. Please allow microphone permissions.');
+      }
+    }
+
+    function _stopRecording() {
+      if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+        mediaRecorder.stop();
+      }
+      isRecording = false;
+      $micBtn.classList.remove('recording');
+      $micBtn.setAttribute('aria-label', 'Record voice message');
+    }
+
+    function _getAudioMimeType() {
+      const types = ['audio/webm', 'audio/ogg', 'audio/mp4'];
+      for (const t of types) {
+        if (MediaRecorder.isTypeSupported(t)) return t;
+      }
+      return 'audio/webm';
+    }
+
+    async function _sendVoiceInput(blob) {
+      _showTyping(true);
+
+      try {
+        const formData = new FormData();
+        const ext = blob.type.includes('ogg') ? 'ogg' : blob.type.includes('mp4') ? 'm4a' : 'webm';
+        formData.append('audio', blob, `recording.${ext}`);
+
+        const res = await fetch(`${API_BASE}/voice-input`, {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+        const data = await res.json();
+        const transcript = data.transcript || '';
+
+        _showTyping(false);
+
+        if (transcript) {
+          $chatInput.value = transcript;
+          _handleSend();
+        } else {
+          _appendMessage('bot', "I couldn't quite catch that. Could you try speaking again or typing instead?");
+        }
+
+      } catch (err) {
+        console.error('[app] Voice input error:', err);
+        _showTyping(false);
+        _appendMessage('bot', "I had trouble processing your voice. Could you try typing instead?");
+      }
+    }
+
+    /* ================================================================
+       LOCAL CRISIS KEYWORD CHECK (client-side safety net)
+       ================================================================ */
+    function _localCrisisCheck(text) {
+      const keywords = [
+        'suicide', 'suicidal', 'kill myself', 'end my life',
+        'self-harm', 'want to die', 'hopeless', 'no reason to live',
+        'better off dead', 'end it all',
+      ];
+      const lower = text.toLowerCase();
+      return keywords.some(k => lower.includes(k));
+    }
+
+    /* ================================================================
+       THEME TOGGLE
+       ================================================================ */
+    document.getElementById('theme-sky-btn').addEventListener('click', () => {
+      document.body.className = 'theme-sky';
+    });
+
+    document.getElementById('theme-night-btn').addEventListener('click', () => {
+      document.body.className = 'theme-night';
+    });
+
+  </script>
+</body>
+
+</html>

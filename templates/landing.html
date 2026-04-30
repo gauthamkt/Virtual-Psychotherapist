@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindSpace - AI Therapy In Your Pocket</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4F46E5;
+            --primary-dark: #4338CA;
+            --text-light: #F3F4F6;
+            --white: #FFFFFF;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body,
+        html {
+            height: 100%;
+            font-family: 'Inter', sans-serif;
+            color: var(--white);
+            overflow: hidden;
+        }
+
+        /* Background Video */
+        .video-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            overflow: hidden;
+            background: #111;
+        }
+
+        .video-container video {
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            object-fit: cover;
+        }
+
+        .video-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.55);
+            z-index: -1;
+        }
+
+        /* Navbar */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 24px 60px;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 10;
+            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.6) 0%, transparent 100%);
+        }
+
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--white);
+            text-decoration: none;
+            letter-spacing: -0.5px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+            align-items: center;
+        }
+
+        /* Dropdown Structure */
+        .nav-item {
+            position: relative;
+            padding: 10px 0;
+            /* Creates an invisible bridge to hover the dropdown */
+        }
+
+        .nav-link {
+            text-decoration: none;
+            color: var(--text-light);
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: color 0.2s;
+            cursor: pointer;
+        }
+
+        .nav-link:hover {
+            color: var(--white);
+        }
+
+        .nav-link svg {
+            width: 12px;
+            height: 12px;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: var(--white);
+            border-radius: 12px;
+            padding: 12px 0;
+            min-width: 220px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(10px);
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 20;
+        }
+
+        .nav-item:hover .dropdown-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-item {
+            display: block;
+            padding: 8px 20px;
+            color: #333;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background 0.15s, color 0.15s;
+        }
+
+        .dropdown-item:hover {
+            background: #f3f4f6;
+            color: var(--primary-dark);
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .lang-selector {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .btn-login {
+            text-decoration: none;
+            color: var(--white);
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .btn-get-started {
+            text-decoration: none;
+            background: var(--white);
+            color: var(--primary-dark);
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn-get-started:hover {
+            background: #f8f9fa;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(255, 255, 255, 0.15);
+        }
+
+        /* Hero Section */
+        .hero {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            text-align: center;
+            padding: 0 20px;
+        }
+
+        .hero h1 {
+            font-size: 64px;
+            line-height: 1.15;
+            font-weight: 800;
+            margin-bottom: 24px;
+            letter-spacing: -1.5px;
+        }
+
+        .hero p {
+            font-size: 18px;
+            line-height: 1.6;
+            color: var(--text-light);
+            max-width: 600px;
+            margin-bottom: 40px;
+        }
+
+        .btn-start-chat {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--white);
+            color: var(--primary-dark);
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s;
+            margin-bottom: 24px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-start-chat svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .btn-start-chat:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+            background: #f8f9fa;
+        }
+
+        .features {
+            display: flex;
+            gap: 32px;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-light);
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .feature-item svg {
+            width: 16px;
+            height: 16px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Background Video -->
+    <div class="video-container">
+        <!-- Placeholder high-quality video showing typing on phone -- replace src with your own if needed -->
+        <video autoplay muted loop playsinline
+            src="https://image2url.com/r2/default/videos/1772310513081-548412df-2348-47f5-8e60-fb9232fb4600.mp4"></video>
+    </div>
+    <div class="video-overlay"></div>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <a href="/" class="logo">MindSpace</a>
+
+        <div class="nav-links">
+            <div class="nav-item">
+                <span class="nav-link">Types of Therapy <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg></span>
+                <div class="dropdown-menu">
+                    <a href="/chat?msg=Cognitive Behavioral Therapy (CBT)" class="dropdown-item">Cognitive Behavioral
+                        (CBT)</a>
+                    <a href="/chat?msg=Dialectical Behavior Therapy (DBT)" class="dropdown-item">Dialectical Behavior
+                        (DBT)</a>
+                    <a href="/chat?msg=Psychodynamic Therapy" class="dropdown-item">Psychodynamic Therapy</a>
+                    <a href="/chat?msg=Humanistic Therapy" class="dropdown-item">Humanistic Therapy</a>
+                </div>
+            </div>
+
+            <div class="nav-item">
+                <span class="nav-link">Topics <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg></span>
+                <div class="dropdown-menu">
+                    <a href="/chat?msg=I want to talk about Anxiety and Panic" class="dropdown-item">Anxiety & Panic</a>
+                    <a href="/chat?msg=I want to talk about Depression" class="dropdown-item">Depression</a>
+                    <a href="/chat?msg=I want to talk about Relationships and Family"
+                        class="dropdown-item">Relationships & Family</a>
+                    <a href="/chat?msg=I want to talk about Grief and Loss" class="dropdown-item">Grief & Loss</a>
+                    <a href="/chat?msg=I want to talk about Self-Esteem Tools" class="dropdown-item">Self-Esteem
+                        Tools</a>
+                </div>
+            </div>
+
+            <div class="nav-item">
+                <span class="nav-link">Common Struggles <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg></span>
+                <div class="dropdown-menu">
+                    <a href="/chat?msg=I am struggling with Workplace Burnout" class="dropdown-item">Workplace
+                        Burnout</a>
+                    <a href="/chat?msg=I am struggling with Social Anxiety" class="dropdown-item">Social Anxiety</a>
+                    <a href="/chat?msg=I am struggling with Insomnia" class="dropdown-item">Insomnia</a>
+                    <a href="/chat?msg=I am struggling with Imposter Syndrome" class="dropdown-item">Imposter
+                        Syndrome</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="nav-actions">
+            <a href="#" class="nav-link" style="color: var(--white); text-decoration: none;">About Us</a>
+            <a href="#" class="btn-login">Login</a>
+            <a href="/chat" class="btn-get-started">Get Started</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <main class="hero">
+        <h1>AI Therapy<br>In Your Pocket</h1>
+        <p>Experience round-the-clock support and guidance with a 24/7 AI therapist, always at your fingertips to help
+            you navigate life's challenges.</p>
+
+        <a href="/chat" class="btn-start-chat">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+            Start Chatting Now
+        </a>
+
+        <div class="features">
+            <div class="feature-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                Available 24/7
+            </div>
+            <div class="feature-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                Free Instant Access
+            </div>
+        </div>
+    </main>
+
+</body>
+
+</html>
